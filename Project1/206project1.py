@@ -1,6 +1,8 @@
 import os
 import filecmp
 import csv
+from collections import Counter
+import re
 
 def getData(file):
 #Input: file name
@@ -14,16 +16,13 @@ def getData(file):
 
 	#Your code here:
 
-	
 	facebook = []
 	with open(file) as csvfile:
 		readCSV = csv.reader(csvfile, delimiter=',')
 		for row in readCSV:
-			#print(row[0] + row[1] +row[2])
 			if row[0] == "First":
 				continue
 			tempdic = {"First" : row[0], "Last" : row[1], "Email" : row[2], "Class" : row[3], "DOB" : row[4] }
-			#print(tempdic)
 			facebook.append(tempdic)
 
 	return facebook			
@@ -34,8 +33,12 @@ def mySort(data,col):
 #Input: list of dictionaries
 #Output: Return a string of the form firstName lastName
 
-	#Your code here:
-	pass
+	newlist = sorted(data, key=lambda k: k[col])
+
+	name = newlist[0].get("First") + " " + newlist[0].get("Last")
+	return name
+
+
 
 #Create a histogram
 def classSizes(data):
@@ -44,19 +47,54 @@ def classSizes(data):
 # ClassName and Class size, e.g 
 # [('Senior', 26), ('Junior', 25), ('Freshman', 21), ('Sophomore', 18)]
 
+#count num of senior, juniors etc
+#put in a list of tuples
+
+# iterate thru dictionaries
+# look at the clas 
+# make counter fr each clas
+
+
 	#Your code here:
-	pass
+	#data = sorted(data, key=lambda k: k[])
+	senior = 0
+	junior = 0
+	fresh = 0
+	soph = 0
 
+	for d in data:
+		clss = d.get("Class")
+		
+		if clss == "Senior": 
+			senior += 1
+		elif clss == "Junior": 
+			junior += 1
+		elif clss == "Sophomore": 
+			soph += 1
+		elif clss == "Freshman": 
+			fresh += 1
 
+	tuplist = [ ("Senior", senior), ("Junior", junior), ("Sophomore", soph), ("Freshman", fresh) ]
+	tuplist = sorted(tuplist, key = lambda x: x[1], reverse = True)
+	return tuplist
 
 # Find the most common day of the year to be born
 def findDay(a):
 # Input: list of dictionaries
 # Output: Return the day of month (1-31) that is the
 # most often seen in the DOB
+	lst = []
+	for d in a:
+		date = d.get("DOB")
+		lst = lst.append( date[ : len(date)-4] )
+		lst = re.findall(([0-31]), lst[0])
+		print(lst)
+
+
 
 	#Your code here:
-	pass
+	
+	
 
 
 # Find the average age (rounded) of the Students
