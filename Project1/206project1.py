@@ -1,8 +1,10 @@
 import os
 import filecmp
+
 import csv
-from collections import Counter
+import statistics
 import re
+import datetime
 
 def getData(file):
 #Input: file name
@@ -86,15 +88,12 @@ def findDay(a):
 	lst = []
 	for d in a:
 		date = d.get("DOB")
-		lst = lst.append( date[ : len(date)-4] )
-		lst = re.findall(([0-31]), lst[0])
-		print(lst)
+		word = re.findall( '/.*/' , date )
+		lst.append(word[0][1: len(word[0])-1 ])
+
+	return int( statistics.mode(lst) )
 
 
-
-	#Your code here:
-	
-	
 
 
 # Find the average age (rounded) of the Students
@@ -102,9 +101,17 @@ def findAge(a):
 # Input: list of dictionaries
 # Output: Return the day of month (1-31) that is the
 # most often seen in the DOB
+	ages = []
+	today = datetime.datetime.now()
 
-	#Your code here:
-	pass
+	for d in a:
+		strdate = d.get("DOB") #get b day
+		temp = strdate.split("/")
+		bday = datetime.datetime(int(temp[2]), int(temp[0]), int(temp[1]))
+		ages.append(((today-bday).days)/365)
+	return round(statistics.mean(ages))
+
+
 
 #Similar to mySort, but instead of returning single
 #Student, all of the sorted data is saved to a csv file.
