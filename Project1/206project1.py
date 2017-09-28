@@ -118,9 +118,17 @@ def findAge(a):
 def mySortPrint(a,col,fileName):
 #Input: list of dictionaries, key to sort by and output file name
 #Output: None
+	
+	lst = sorted(a, key = lambda k: k[col])
 
-	#Your code here:
-	pass
+	with open(fileName, 'w') as csvfile:
+		c = csv.writer(csvfile)
+
+		for row in lst:
+			c.writerow([row["First"]] + [row["Last"]] + [row["Email"]])
+
+
+
 
 
 
