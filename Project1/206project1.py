@@ -1,3 +1,9 @@
+#Manali Desai
+#9/29/17
+#repository link: https://github.com/schrodingerscat1901/206/tree/master/Project1
+
+
+
 import os
 import filecmp
 
@@ -5,6 +11,7 @@ import csv
 import statistics
 import re
 import datetime
+
 
 def getData(file):
 #Input: file name
@@ -121,11 +128,10 @@ def mySortPrint(a,col,fileName):
 	
 	lst = sorted(a, key = lambda k: k[col])
 
-	with open(fileName, 'w') as csvfile:
+	with open(fileName, 'w', newline="\n") as csvfile:
 		c = csv.writer(csvfile)
-
 		for row in lst:
-			c.writerow([row["First"]] + [row["Last"]] + [row["Email"]])
+			c.writerow([row["First"]] + [row["Last"]] + [row["Email"]] )
 
 
 
