@@ -10,6 +10,7 @@
 ###########
 
 ## Import statements
+import urllib.request, urllib.parse, urllib.error
 import unittest
 import requests
 import re
@@ -52,28 +53,41 @@ def find_urls(s):
 ## http://www.michigandaily.com/section/opinion
 
 def grab_headlines():
+
+
+#AUTOGRADER VERSION
     url = 'opinion.html' #'http://www.michigandaily.com/section/opinion'
     file = open(url)
     file = file.read()
-    big_soup = BeautifulSoup(file, "lxml")
+    big_soup = BeautifulSoup(file, "lxml") 
 
-    items = big_soup.find_all(class_='item-list')
+    lst = big_soup.find("ol") #gets 'ol' tag that contains the info
+    lis = lst.find_all('li') #creates a list of all the'li' objects 
 
-    print(items)
+    headlines = [] 
+    for li in lis:
+        headlines += [(li.text)] #appends the headlines to a list
+
+    print(headlines)
+    return headlines
+
+#VERSION FOR URLS
+    # url = 'http://www.michigandaily.com/section/opinion'
+
+    # html = urllib.request.urlopen(url).read()
+    # big_soup = BeautifulSoup(html, "lxml")
+
+    # lst = big_soup.find("ol")
+    # lis = lst.find_all('li')
+
+    # headlines = []
+    # for li in lis:
+    #     headlines += [(li.text)]
+
+    # print(headlines)
+    # return headlines
 
 
-
-
-
-
-    # lst = soup.find(class_='item-list')
-    # links = lst.find_all('li')
-    #     headline = soup('ol')
-    #     print(headline)
-    # lst = lst.findall('li')
-
-    #print(links)
-    #Your code here
 
 
 
@@ -89,14 +103,46 @@ def grab_headlines():
 ## requests.get(base_url, headers={'User-Agent': 'SI_CLASS'}) 
 
 def get_umsi_data():
-    pass
-    #Your code here
+    umsi_titles = {}
+
+    url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All'
+    # html = requests.get(url, headers={'User-Agent': 'SI_CLASS'})
+    # big_soup = BeautifulSoup(html.text, "lxml")
+   
+    while url != None:
+
+        html = requests.get(url, headers={'User-Agent': 'SI_CLASS'})
+        big_soup = BeautifulSoup(html.text, "lxml")
+
+        names = big_soup.find_all(class_='field-item even', property="dc:title") #get all the names on the page
+        # get all the positions on the page
+        positions = big_soup.find_all(class_='field field-name-field-person-titles field-type-text field-label-hidden')
+        
+        for i in range(len(names)): 
+            # print(names[i].text + " " + positions[i].text)
+            # print(" ")
+            umsi_titles[names[i].text] = positions[i].text
+
+        link = big_soup.find('a',  title= "Go to next page")
+        
+        if link == None:
+            break;
+
+        url = 'https://www.si.umich.edu' + link.get('href', None)
+        #print(url)
+
+    # print(umsi_titles)
+    return umsi_titles
+
+
+
 
 ## PART 3 (b) Define a function called num_students.  
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
     pass
+    
     #Your code here
 
 
