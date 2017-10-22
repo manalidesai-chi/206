@@ -1,7 +1,7 @@
 ## SI 206 W17 - Project 2
 
 ## COMMENT HERE WITH:
-## Your name:
+## Your name: Manali Desai
 ## Anyone you worked with on this project:
 
 ## Below we have provided import statements, comments to separate out the 
@@ -28,21 +28,8 @@ from bs4 import BeautifulSoup
 ## find_urls("the internet is awesome #worldwideweb") should return [], empty list
 
 def find_urls(s):
-    # soup = BeautifulSoup(s, "lxml")
-    # lst = soup.find_all('a')
-    # link = []
-    # print(lst)
-    # for l in lst:
-    #     link += l.get('href')
 
-    # #print(link)
-    # return link
-
-    #Your code here
-    lst = []
-    #print(s)
-    lst = re.findall('http\S+[.]\S\S+', s) #[.]\S+     'http[s:/]+[^.]+[.]\S+'
-    #print(lst)
+    lst = re.findall('http\S+[.]\S\S+', s) 
     return lst
 
 
@@ -68,7 +55,6 @@ def grab_headlines():
     for li in lis:
         headlines += [(li.text)] #appends the headlines to a list
 
-    print(headlines)
     return headlines
 
 #VERSION FOR URLS
@@ -109,23 +95,23 @@ def get_umsi_data():
     # html = requests.get(url, headers={'User-Agent': 'SI_CLASS'})
     # big_soup = BeautifulSoup(html.text, "lxml")
    
-    while url != None:
+    while url != None: #while there is another page to go to
 
         html = requests.get(url, headers={'User-Agent': 'SI_CLASS'})
-        big_soup = BeautifulSoup(html.text, "lxml")
+        big_soup = BeautifulSoup(html.text, "lxml")  #create soup for that page
 
-        names = big_soup.find_all(class_='field-item even', property="dc:title") #get all the names on the page
+        #get all the names on the page
+        names = big_soup.find_all(class_='field-item even', property="dc:title") 
+
         # get all the positions on the page
         positions = big_soup.find_all(class_='field field-name-field-person-titles field-type-text field-label-hidden')
         
-        for i in range(len(names)): 
-            # print(names[i].text + " " + positions[i].text)
-            # print(" ")
-            umsi_titles[names[i].text] = positions[i].text
+        for i in range(len(names)): #iterate thru the number on the page
+            umsi_titles[names[i].text] = positions[i].text  #put the name and position into dict
 
-        link = big_soup.find('a',  title= "Go to next page")
+        link = big_soup.find('a',  title= "Go to next page") #find link to next page
         
-        if link == None:
+        if link == None: #if no link break the loop
             break;
 
         url = 'https://www.si.umich.edu' + link.get('href', None)
@@ -141,10 +127,12 @@ def get_umsi_data():
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
-    pass
-    
-    #Your code here
+    phd_count = 0
+    for key in data:
+        if data[key] == "PhD student":
+            phd_count += 1
 
+    return phd_count
 
 
 
