@@ -5,7 +5,8 @@ import json
 
 ## SI 206 - HW
 ## COMMENT WITH:
-## Your section day/time:
+#Manali Desai
+## Your section day/time: Thurs 6-7
 ## Any names of people you worked with on this assignment:
 
 
