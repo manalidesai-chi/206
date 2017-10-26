@@ -86,21 +86,15 @@ def get_twitter_data(phrase):
 
 	if phrase in CACHE_DICT:
 		print("using cache")
-		# print(type(CACHE_DICT))
-		# print(type(CACHE_DICT[phrase]))
 		return CACHE_DICT[phrase]
 
 	else:
 		print("fetching")
 		results = api.search(q = phrase)
-		# print(type(results))
+
 		try:
 
-			CACHE_DICT[phrase] = results #json.dumps(results)
-
-			# print(type(CACHE_DICT))
-			# print(type(CACHE_DICT[phrase]))
-
+			CACHE_DICT[phrase] = results 
 			dumped_json_cache = json.dumps(CACHE_DICT)
 			fw = open(CACHE_FNAME,"w")
 			fw.write(dumped_json_cache)
@@ -108,12 +102,8 @@ def get_twitter_data(phrase):
 			return CACHE_DICT[phrase]
 		except:
 			print("didnt work -.-")
+			return None
 	
-
-		# CACHE_DICT[phrase] = json.loads(results[0].text)
-		# return results[].text
-		# return (results[0]+ "\n" + results[1] + "\n" + results[2] + "\n" + results[3] + "\n" + results[4])
-
 
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
@@ -133,14 +123,6 @@ for i in range(3):
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
 ## 		content from 5 tweets, as shown in the linked example.
-
-
-	# print(type(results))
-	# print(results.get('statuses')[0].get('text'))
-	# print(results)
-
-	# for i in range(5):
-	# 	print( results['statuses'].get('text') + "\n")
 
 
 
