@@ -77,29 +77,27 @@ except:
 
 
 
-
-
 ## 2. Write a function to get twitter data that works with the caching pattern, 
 ## 		so it either gets new data or caches data, depending upon what the input 
 ##		to search for is. 
 def get_twitter_data(phrase):
 
-	if phrase in CACHE_DICT:
+	if phrase in CACHE_DICT: #checks if data is in cache
 		print("using cache")
-		return CACHE_DICT[phrase]
+		return CACHE_DICT[phrase] 
 
 	else:
 		print("fetching")
-		results = api.search(q = phrase)
+		results = api.search(q = phrase) #gets twitter data
 
 		try:
 
-			CACHE_DICT[phrase] = results 
-			dumped_json_cache = json.dumps(CACHE_DICT)
-			fw = open(CACHE_FNAME,"w")
-			fw.write(dumped_json_cache)
+			CACHE_DICT[phrase] = results #puts results in dictionary under key phrase
+			dumped_json_cache = json.dumps(CACHE_DICT) #dumps cache_dict as a string 
+			fw = open(CACHE_FNAME,"w")  #opens cache file
+			fw.write(dumped_json_cache) #writes string to cache file
 			fw.close() # Close the open file
-			return CACHE_DICT[phrase]
+			return CACHE_DICT[phrase] #returns dictionary for specific phrase
 		except:
 			print("didnt work -.-")
 			return None
@@ -109,22 +107,16 @@ def get_twitter_data(phrase):
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
 
-
 prompt = "Enter tweet term: "
 
-for i in range(3):
+for i in range(3): 
 	phrase = input(prompt)
 	results = get_twitter_data(phrase)
-
-
-
 
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
 ## 		content from 5 tweets, as shown in the linked example.
-
-
 
 	for i in range(5):
 		print('TEXT: ' + results.get('statuses')[i].get('text'))
