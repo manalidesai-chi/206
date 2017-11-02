@@ -90,18 +90,12 @@ def get_twitter_data(phrase):
 		print("fetching")
 		results = api.search(q = phrase) #gets twitter data
 
-		try:
-
-			CACHE_DICT[phrase] = results #puts results in dictionary under key phrase
-			dumped_json_cache = json.dumps(CACHE_DICT) #dumps cache_dict as a string 
-			fw = open(CACHE_FNAME,"w")  #opens cache file
-			fw.write(dumped_json_cache) #writes string to cache file
-			fw.close() # Close the open file
-			return CACHE_DICT[phrase] #returns dictionary for specific phrase
-		except:
-			print("didnt work -.-")
-			return None
-	
+		CACHE_DICT[phrase] = results #puts results in dictionary under key phrase
+		dumped_json_cache = json.dumps(CACHE_DICT) #dumps cache_dict as a string 
+		fw = open(CACHE_FNAME,"w")  #opens cache file
+		fw.write(dumped_json_cache) #writes string to cache file
+		fw.close() # Close the open file
+		return CACHE_DICT[phrase] #returns dictionary for specific phrase
 
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
