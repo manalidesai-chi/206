@@ -37,7 +37,27 @@ except:
 
 def get_tweets():
 ##YOUR CODE HERE
+
 	phrase = "umsi"
+	#dfghjkl
+	data = {}
+
+	if phrase in CACHE_DICTION: #checks if data is in cache
+		print("using cache")
+		data = CACHE_DICTION[phrase] 
+
+	else:
+		print("fetching")
+		results = api.search(q = phrase) #gets twitter data
+
+		CACHE_DICTION[phrase] = results #puts results in dictionary under key phrase
+		dumped_json_cache = json.dumps(CACHE_DICTION) #dumps cache_dict as a string 
+		fw = open(CACHE_FNAME,"w")  #opens cache file
+		fw.write(dumped_json_cache) #writes string to cache file
+		fw.close() # Close the open file
+		data = CACHE_DICTION[phrase] #returns dictionary for specific phrase
+
+
 
 
 
