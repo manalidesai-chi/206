@@ -8,6 +8,7 @@ import tweepy
 import twitter_info # still need this in the same directory, filled out
 
 #Manali Desai
+#Thursday lab 6-7
 
 consumer_key = twitter_info.consumer_key
 consumer_secret = twitter_info.consumer_secret
