@@ -17,6 +17,8 @@ import tweepy
 import twitter_info # same deal as always...
 import json
 import sqlite3
+from datetime import datetime 
+# import time
 
 ## Your name:
 ## The names of anyone you worked with on this project:
@@ -50,19 +52,42 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 CACHE_FNAME = "206_APIsAndDBs_cache.json"
 # Put the rest of your caching setup here:
 
-
+try:
+	cache = open(CACHE_FNAME, 'r')
+	cache_content = cache.read()
+	cache.close()
+	cache_dict = json.loads(cache_content)
+except:
+	cache_dict = {}
 
 # Define your function get_user_tweets here:
 
+def get_user_tweets(user):
+
+	if user in cache_dict:
+		return cache_dict[user]['statuses']
+	else:
+		data = api.search(q = user)
+
+		cache_dict[user] = data
+		dump_json_cache = json.dumps(cache_dict)
+		fw = open(CACHE_FNAME, 'w')  #? why w
+		fw.write(dump_json_cache)
+		fw.close()
+		return data['statuses']
 
 
 
 
 # Write an invocation to the function for the "umich" user timeline and 
 # save the result in a variable called umich_tweets:
+user = 'umich'
 
+umich_tweets = get_user_tweets(user)
+#print(type(umich_tweets[19]))
 
-
+conn = sqlite3.connect('tweets.sqlite')
+cur = conn.cursor()
 
 ## Task 2 - Creating database and loading data into database
 ## You should load into the Users table:
@@ -73,6 +98,9 @@ CACHE_FNAME = "206_APIsAndDBs_cache.json"
 # in the Users table, etc.
 
 
+ 
+cur.execute('DROP TABLE IF EXISTS Users')
+cur.execute('CREATE TABLE Users (user_id INTEGER, screen_name TEXT, num_favs INTEGER, discription TEXT )')
 
 ## You should load into the Tweets table: 
 # Info about all the tweets (at least 20) that you gather from the 
@@ -80,17 +108,83 @@ CACHE_FNAME = "206_APIsAndDBs_cache.json"
 # NOTE: Be careful that you have the correct user ID reference in 
 # the user_id column! See below hints.
 
-
 ## HINT: There's a Tweepy method to get user info, so when you have a 
 ## user id or screenname you can find alllll the info you want about 
 ## the user.
+
+user_timeline = api.user_timeline(user)
 
 ## HINT: The users mentioned in each tweet are included in the tweet 
 ## dictionary -- you don't need to do any manipulation of the Tweet 
 ## text to find out which they are! Do some nested data investigation 
 ## on a dictionary that represents 1 tweet to see it!
 
+cur.execute('DROP TABLE IF EXISTS Tweets')
+cur.execute('CREATE TABLE Tweets (tweet_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, text TEXT, user_posted INTEGER, time_posted DATETIME, retweets INTEGER)')
+#joins tweet table with user table
+cur.execute('SELECT Tweets.tweet_id, Users.user_id, Tweets.user_posted FROM Tweets JOIN Users ON Tweets.user_posted = Users.user_id')
 
+
+#puts user data in data base once using the first tweet
+cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, discription ) VALUES (?,?,?,?)' , ( user_timeline[0]['user']['id'], user_timeline[0]['user']['screen_name'], user_timeline[0]['user']['favourites_count'], user_timeline[0]['user']['description'] ))
+	
+
+for tweet in user_timeline:
+	
+	#coverts timestamp to datetime
+	time = datetime.strptime(tweet['created_at'] , '%a %b %d %H:%M:%S %z %Y' ) 
+	#puts tweet data into database
+	cur.execute('INSERT INTO Tweets (tweet_id, text, user_posted, time_posted, retweets) VALUES (?,?,?,?,?)' , (tweet['id'], tweet['text'], tweet['user']['id'], time, tweet['retweet_count'] ))
+
+		
+	
+	# try:
+	# 	cur.execute('SELECT user_id FROM Users WHERE screen_name = tweet['user']['screen_name'] ')
+	# 	acct = cur.fetchone()
+	# 	print("sdfghjk")
+	# except:
+	# 	print('No unretrieved Twitter accounts found')
+	# 	continue
+
+
+# cur.execute('SELECT name FROM Twitter WHERE retrieved = 0 LIMIT 1')
+# try:
+# acct = cur.fetchone()[0]
+# except:
+# print('No unretrieved Twitter accounts found')
+# continue
+
+	# cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, discription ) VALUES (?,?,?,?)' , ( tweet['user']['id'], tweet['user']['screen_name'], tweet['user']['favourites_count'], tweet['user']['description'] ))
+	
+	for user in tweet['entities']['user_mentions'] :
+
+		cur.execute(' SELECT user_id FROM Users ')
+		lst = cur.fetchall()  #get list of of all the user ids in Users
+
+		if user['id'] in lst: 
+			 continue #if user id is in list do nothing
+		else: #if user id is not in list put it in 
+			cur.execute('INSERT INTO Users (user_id, screen_name ) VALUES (?,?)' , ( user['id'], user['screen_name'] ))
+	
+		# try:
+		# 	acct = cur.fetchone()[0]
+		# 	print('1')
+		# except:
+		# 	print('2')
+
+
+		# if 
+		# 	cur.execute('INSERT INTO Users (user_id, screen_name ) VALUES (?,?)' , ( user['user']['id'], user['user']['screen_name'] ))
+	
+	
+
+
+
+
+
+conn.commit()
+cur.close()
+conn.close()
 ## Task 3 - Making queries, saving data, fetching data
 
 # All of the following sub-tasks require writing SQL statements 
