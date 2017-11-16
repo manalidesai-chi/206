@@ -176,7 +176,7 @@ for tweet in user_timeline:
 		# if 
 		# 	cur.execute('INSERT INTO Users (user_id, screen_name ) VALUES (?,?)' , ( user['user']['id'], user['user']['screen_name'] ))
 	
-	
+
 
 
 
