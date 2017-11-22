@@ -20,7 +20,7 @@ import sqlite3
 from datetime import datetime 
 # import time
 
-## Your name:
+## Your name: Manali Desai
 ## The names of anyone you worked with on this project:
 
 #####
@@ -65,16 +65,16 @@ except:
 def get_user_tweets(user):
 
 	if user in cache_dict:
-		return cache_dict[user]['statuses']
+		return cache_dict[user]
 	else:
-		data = api.search(q = user)
+		data = api.user_timeline(user)
 
 		cache_dict[user] = data
 		dump_json_cache = json.dumps(cache_dict)
-		fw = open(CACHE_FNAME, 'w')  #? why w
+		fw = open(CACHE_FNAME, 'w')  
 		fw.write(dump_json_cache)
 		fw.close()
-		return data['statuses']
+		return data
 
 
 
@@ -84,9 +84,8 @@ def get_user_tweets(user):
 user = 'umich'
 
 umich_tweets = get_user_tweets(user)
-#print(type(umich_tweets[19]))
 
-conn = sqlite3.connect('tweets.sqlite')
+conn = sqlite3.connect('206_APIsAndDBs.sqlite')
 cur = conn.cursor()
 
 ## Task 2 - Creating database and loading data into database
@@ -98,10 +97,6 @@ cur = conn.cursor()
 # in the Users table, etc.
 
 
- 
-cur.execute('DROP TABLE IF EXISTS Users')
-cur.execute('CREATE TABLE Users (user_id INTEGER, screen_name TEXT, num_favs INTEGER, discription TEXT )')
-
 ## You should load into the Tweets table: 
 # Info about all the tweets (at least 20) that you gather from the 
 # umich timeline.
@@ -112,21 +107,26 @@ cur.execute('CREATE TABLE Users (user_id INTEGER, screen_name TEXT, num_favs INT
 ## user id or screenname you can find alllll the info you want about 
 ## the user.
 
-user_timeline = api.user_timeline(user)
+
 
 ## HINT: The users mentioned in each tweet are included in the tweet 
 ## dictionary -- you don't need to do any manipulation of the Tweet 
 ## text to find out which they are! Do some nested data investigation 
 ## on a dictionary that represents 1 tweet to see it!
 
+user_timeline = umich_tweets
+
+cur.execute('DROP TABLE IF EXISTS Users')
+cur.execute('CREATE TABLE Users (user_id INTEGER, screen_name TEXT, num_favs INTEGER, description TEXT )')
+
 cur.execute('DROP TABLE IF EXISTS Tweets')
 cur.execute('CREATE TABLE Tweets (tweet_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, text TEXT, user_posted INTEGER, time_posted DATETIME, retweets INTEGER)')
 #joins tweet table with user table
-cur.execute('SELECT Tweets.tweet_id, Users.user_id, Tweets.user_posted FROM Tweets JOIN Users ON Tweets.user_posted = Users.user_id')
+# cur.execute('SELECT Tweets.tweet_id, Users.user_id, Tweets.user_posted FROM Tweets JOIN Users ON Tweets.user_posted = Users.user_id')
 
 
 #puts user data in data base once using the first tweet
-cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, discription ) VALUES (?,?,?,?)' , ( user_timeline[0]['user']['id'], user_timeline[0]['user']['screen_name'], user_timeline[0]['user']['favourites_count'], user_timeline[0]['user']['description'] ))
+cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, description ) VALUES (?,?,?,?)' , ( user_timeline[0]['user']['id'], user_timeline[0]['user']['screen_name'], user_timeline[0]['user']['favourites_count'], user_timeline[0]['user']['description'] ))
 	
 
 for tweet in user_timeline:
@@ -136,55 +136,23 @@ for tweet in user_timeline:
 	#puts tweet data into database
 	cur.execute('INSERT INTO Tweets (tweet_id, text, user_posted, time_posted, retweets) VALUES (?,?,?,?,?)' , (tweet['id'], tweet['text'], tweet['user']['id'], time, tweet['retweet_count'] ))
 
-		
-	
-	# try:
-	# 	cur.execute('SELECT user_id FROM Users WHERE screen_name = tweet['user']['screen_name'] ')
-	# 	acct = cur.fetchone()
-	# 	print("sdfghjk")
-	# except:
-	# 	print('No unretrieved Twitter accounts found')
-	# 	continue
-
-
-# cur.execute('SELECT name FROM Twitter WHERE retrieved = 0 LIMIT 1')
-# try:
-# acct = cur.fetchone()[0]
-# except:
-# print('No unretrieved Twitter accounts found')
-# continue
-
-	# cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, discription ) VALUES (?,?,?,?)' , ( tweet['user']['id'], tweet['user']['screen_name'], tweet['user']['favourites_count'], tweet['user']['description'] ))
 	
 	for user in tweet['entities']['user_mentions'] :
 
 		cur.execute(' SELECT user_id FROM Users ')
-		lst = cur.fetchall()  #get list of of all the user ids in Users
+		lst = [ x[0] for x in cur.fetchall() ] #gets list of of all the user ids in Users
 
 		if user['id'] in lst: 
 			 continue #if user id is in list do nothing
 		else: #if user id is not in list put it in 
-			cur.execute('INSERT INTO Users (user_id, screen_name ) VALUES (?,?)' , ( user['id'], user['screen_name'] ))
-	
-		# try:
-		# 	acct = cur.fetchone()[0]
-		# 	print('1')
-		# except:
-		# 	print('2')
-
-
-		# if 
-		# 	cur.execute('INSERT INTO Users (user_id, screen_name ) VALUES (?,?)' , ( user['user']['id'], user['user']['screen_name'] ))
-	
-
-
-
+			userm = api.get_user(user['id'])
+			# print(userm)
+			cur.execute('INSERT INTO Users (user_id, screen_name, num_favs, description ) VALUES (?,?,?,?)' , ( user['id'], user['screen_name'], userm['favourites_count'], userm['description'] ))
 
 
 
 conn.commit()
-cur.close()
-conn.close()
+
 ## Task 3 - Making queries, saving data, fetching data
 
 # All of the following sub-tasks require writing SQL statements 
@@ -193,40 +161,53 @@ conn.close()
 # Make a query to select all of the records in the Users database. 
 # Save the list of tuples in a variable called users_info.
 
-users_info = True
+cur.execute(' SELECT * FROM Users ')
+users_info = cur.fetchall()
+
 
 # Make a query to select all of the user screen names from the database. 
 # Save a resulting list of strings (NOT tuples, the strings inside them!) 
 # in the variable screen_names. HINT: a list comprehension will make 
 # this easier to complete! 
-screen_names = True
+cur.execute(' SELECT screen_name FROM Users ')
+screen_names =  [ " ".join(x) for x in cur.fetchall() ]
 
 
 # Make a query to select all of the tweets (full rows of tweet information)
 # that have been retweeted more than 10 times. Save the result 
 # (a list of tuples, or an empty list) in a variable called retweets.
-retweets = True
+cur.execute(' SELECT * FROM Tweets WHERE retweets > 10 ')
+retweets = cur.fetchall()
+
 
 
 # Make a query to select all the descriptions (descriptions only) of 
 # the users who have favorited more than 500 tweets. Access all those 
 # strings, and save them in a variable called favorites, 
 # which should ultimately be a list of strings.
-favorites = True
+cur.execute(' SELECT description FROM Users WHERE num_favs > 500 ')
+favorites = [ " ".join(x) for x in cur.fetchall() ]
+
 
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 
 # elements in each tuple: the user screenname and the text of the 
 # tweet. Save the resulting list of tuples in a variable called joined_data2.
-joined_data = True
+cur.execute(' SELECT Users.screen_name, Tweets.text FROM Users JOIN Tweets ON Users.user_id = Tweets.user_posted')
+joined_data = cur.fetchall()
+
 
 # Make a query using an INNER JOIN to get a list of tuples with 2 
 # elements in each tuple: the user screenname and the text of the 
 # tweet in descending order based on retweets. Save the resulting 
 # list of tuples in a variable called joined_data2.
+cur.execute(' SELECT Users.screen_name, Tweets.text FROM Users JOIN Tweets ON Users.user_id = Tweets.user_posted ORDER BY Tweets.retweets DESC')
+joined_data2 = cur.fetchall()
 
-joined_data2 = True
 
+
+cur.close()
+conn.close()
 
 ### IMPORTANT: MAKE SURE TO CLOSE YOUR DATABASE CONNECTION AT THE END 
 ### OF THE FILE HERE SO YOU DO NOT LOCK YOUR DATABASE (it's fixable, 
