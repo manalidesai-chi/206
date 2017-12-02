@@ -23,7 +23,6 @@ from bs4 import BeautifulSoup
 ## INPUT: any string
 ## RETURN VALUE: a list of strings that represents all of the URLs in the input string
 
-
 ## For example: 
 ## find_urls("http://www.google.com is a great site") should return ["http://www.google.com"]
 ## find_urls("I love looking at websites like http://etsy.com and http://instagram.com and stuff") should return ["http://etsy.com","http://instagram.com"]
@@ -33,6 +32,7 @@ def find_urls(s):
 
     lst = re.findall('http\S+[.]\S\S+', s) 
     return lst
+
 
 
 
