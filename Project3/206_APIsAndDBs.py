@@ -22,9 +22,6 @@ from datetime import datetime
 
 
 
-
-
-
 ## Your name: Manali Desai
 
 ## The names of anyone you worked with on this project:
